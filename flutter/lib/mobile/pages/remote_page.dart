@@ -632,24 +632,24 @@ class _RemotePageState extends State<RemotePage> with WidgetsBindingObserver {
   }
 
   void operate_next() {
-    gFFI.inputModel.inputKey('VK_NEXT'); 
+    inputModel.inputKey('VK_NEXT'); 
   }
 
   void operate_refresh() {
-    gFFI.inputModel.inputKey('VK_F5'); 
+    inputModel.inputKey('VK_F5'); 
   }
 
   void operate_prev() {
-   gFFI.inputModel.inputKey('VK_PRIOR'); 
+   inputModel.inputKey('VK_PRIOR'); 
   }
 
   void operate_switch() {
     // 模拟按下 Alt 键
-    gFFI.inputModel.alt = true; 
+    inputModel.alt = true; 
     // 发送 Tab 键
-    gFFI.inputModel.inputKey('VK_TAB'); 
+    inputModel.inputKey('VK_TAB'); 
     // 模拟松开 Alt 键
-    gFFI.inputModel.alt = false; 
+    inputModel.alt = false; 
   }
 
 
