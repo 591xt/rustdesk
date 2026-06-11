@@ -25,6 +25,8 @@ import '../../utils/image.dart';
 import '../widgets/dialog.dart';
 import '../widgets/custom_scale_widget.dart';
 
+
+
 final initText = '1' * 1024;
 
 // Workaround for Android (default input method, Microsoft SwiftKey keyboard) when using physical keyboard.
@@ -74,6 +76,8 @@ class _RemotePageState extends State<RemotePage> with WidgetsBindingObserver {
   final FocusNode _mobileFocusNode = FocusNode();
   final FocusNode _physicalFocusNode = FocusNode();
   var _showEdit = false; // use soft keyboard
+
+  var clicks = 0;
 
   Worker? _waylandKeyboardGateWorker;
   bool _waylandKeyboardGateInitialized = false;
@@ -437,7 +441,7 @@ class _RemotePageState extends State<RemotePage> with WidgetsBindingObserver {
       ? getGestureHelp()
       : (_showBar && gFFI.ffiModel.pi.displays.isNotEmpty
           ? getBottomAppBar()
-          : Offstage());
+          : getToolAppBar());
 
   @override
   Widget build(BuildContext context) {
@@ -468,15 +472,20 @@ class _RemotePageState extends State<RemotePage> with WidgetsBindingObserver {
                   backgroundColor: MyTheme.accent,
                   onPressed: () {
                     setState(() {
-                      if (keyboardIsVisible) {
-                        _showEdit = false;
-                        gFFI.invokeMethod("enable_soft_keyboard", false);
-                        _mobileFocusNode.unfocus();
-                        _physicalFocusNode.requestFocus();
-                      } else if (_showGestureHelp) {
-                        _showGestureHelp = false;
-                      } else {
-                        _showBar = !_showBar;
+                      clicks++;
+                      if (clicks >= 3) {
+                        clicks = 0;
+                        if (keyboardIsVisible) {
+                          _showEdit = false;
+                          gFFI.invokeMethod("enable_soft_keyboard", false);
+                          _mobileFocusNode.unfocus();
+                          _physicalFocusNode.requestFocus();
+                        } else if (_showGestureHelp)
+                          {
+                          _showGestureHelp = false;
+                        } else {
+                          _showBar = !_showBar;
+                        }
                       }
                     });
                   }),
@@ -547,6 +556,102 @@ class _RemotePageState extends State<RemotePage> with WidgetsBindingObserver {
           : child,
     );
   }
+
+    Widget getToolAppBar() {
+    return BottomAppBar(
+      elevation: 10,
+      color: Color.fromRGBO(0, 0, 0, 0),
+      child: Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: <Widget>[
+                ElevatedButton(
+                  child: Row(children: [
+                    Icon(Icons.refresh),
+                    SizedBox(width: 5),
+                    Text("刷新")
+                  ]),
+                  onPressed: () {
+                    operate_refresh();
+                  },
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(Colors.white),
+                      foregroundColor: MaterialStateProperty.all(
+                          Color.fromARGB(255, 46, 47, 46))),
+                )
+              ] +
+              <Widget>[
+                ElevatedButton(
+                  child: Row(children: [
+                    Icon(Icons.arrow_upward),
+                    SizedBox(width: 5),
+                    Text("上一页")
+                  ]),
+                  onPressed: () {
+                    operate_prev();
+                  },
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(Colors.white),
+                      foregroundColor: MaterialStateProperty.all(
+                          Color.fromARGB(255, 46, 47, 46))),
+                )
+              ] +
+              <Widget>[
+                ElevatedButton(
+                  child: Row(children: [
+                    Icon(Icons.arrow_downward),
+                    SizedBox(width: 5),
+                    Text("下一页")
+                  ]),
+                  onPressed: () {
+                    operate_next();
+                  },
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(Colors.white),
+                      foregroundColor: MaterialStateProperty.all(
+                          Color.fromARGB(255, 46, 47, 46))),
+                )
+              ] +
+              <Widget>[
+                ElevatedButton(
+                  child: Row(children: [
+                    Icon(Icons.autorenew),
+                    SizedBox(width: 5),
+                    Text("切换")
+                  ]),
+                  onPressed: () {
+                    operate_switch();
+                  },
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(Colors.white),
+                      foregroundColor: MaterialStateProperty.all(
+                          Color.fromARGB(255, 46, 47, 46))),
+                )
+              ]),
+    );
+  }
+
+  void operate_next() {
+    gFFI.inputModel.inputKey('VK_NEXT'); 
+  }
+
+  void operate_refresh() {
+    gFFI.inputModel.inputKey('VK_F5'); 
+  }
+
+  void operate_prev() {
+   gFFI.inputModel.inputKey('VK_PRIOR'); 
+  }
+
+  void operate_switch() {
+    // 模拟按下 Alt 键
+    gFFI.inputModel.alt = true; 
+    // 发送 Tab 键
+    gFFI.inputModel.inputKey('VK_TAB'); 
+    // 模拟松开 Alt 键
+    gFFI.inputModel.alt = false; 
+  }
+
 
   Widget getBottomAppBar() {
     final ffiModel = Provider.of<FfiModel>(context);

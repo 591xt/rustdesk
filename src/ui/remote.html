@@ -6,6 +6,7 @@
         @import url(remote.css);
         @import url(file_transfer.css);
         @import url(header.css);
+        @import url(footer.css);
     </style>
     <script type="text/tiscript">
             include "common.tis";
@@ -15,6 +16,7 @@
             include "port_forward.tis";
             include "grid.tis";
             include "header.tis";
+            include "footer.tis";
             include "printer.tis";
         </script>
 </head>
@@ -36,9 +38,8 @@
             </div>
         </video>
     </div>
-    <div #file-transfer-wrapper>
-    </div>
-    <div #msgbox />
+    <div #file-transfer-wrapper></div>
+    <div #msgbox></div>
 </body>
-
+<footer></footer>
 </html>

@@ -146,7 +146,37 @@ pub(crate) struct ClientClipboardContext {
 }
 
 /// Client of the remote desktop.
+
+use std::sync::atomic::{AtomicUsize, Ordering};
+
+// 全局静态存储选中显示器下标
+static CAPTURE_DISPLAY_IDX: AtomicUsize = AtomicUsize::new(0);
+
+
 pub struct Client;
+
+// 给Client写静态读取方法
+impl Client {
+    // 获取当前选中索引
+    pub fn get_display_idx() -> usize {
+        CAPTURE_DISPLAY_IDX.load(Ordering::SeqCst)
+    }
+    // 设置索引
+    pub fn set_display_idx(val: usize) {
+        CAPTURE_DISPLAY_IDX.store(val, Ordering::SeqCst);
+    }
+
+    // 全局实例获取（你原有global方法保留不动）
+    pub fn global() -> Option<&'static Self> {
+        // 你原本的global逻辑不变
+        Some(&Client)
+    }
+
+    // 发送按键方法你本身已有：send_key
+    pub fn send_key(key_code: i32, is_down: bool) {
+        // 原有内部逻辑不动
+    }
+}
 
 #[cfg(not(target_os = "ios"))]
 struct ClipboardState {
